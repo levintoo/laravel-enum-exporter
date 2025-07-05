@@ -1,0 +1,30 @@
+{
+    "version": "0.0.1",
+    "name": "levintoo/laravel-enum-exporter",
+    "description": "Laravel dev-only package to export PHP enums to TypeScript",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.1"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.23"
+    },
+    "scripts": {
+        "format": "pint"
+    },
+    "autoload": {
+        "psr-4": {
+            "Levintoo\\LaravelEnumExporter\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Levintoo\\LaravelEnumExporter\\EnumExporterServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
