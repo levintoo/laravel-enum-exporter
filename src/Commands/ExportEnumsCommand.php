@@ -131,7 +131,7 @@ class ExportEnumsCommand extends Command
 
         $enumName = class_basename($enumClass);
 
-        $stub = file_get_contents(__DIR__.'/../Stubs/enum.stub');
+        $stub = file_get_contents(__DIR__.'/../stubs/enum.stub');
         $tsContent = str_replace(
             ['{{ enumName }}', '{{ cases }}'],
             [$enumName, implode("\n", $cases)],
@@ -139,7 +139,7 @@ class ExportEnumsCommand extends Command
         );
 
         $fileName = Str::kebab($enumName).'.ts';
-        $outputPath = resource_path("js/enums/{$fileName}");
+        $outputPath = base_path("resources/js/enums/{$fileName}");
 
         if (file_exists($outputPath)) {
             $this->warn("⚠️ Skipped {$fileName}, file already exists.");
