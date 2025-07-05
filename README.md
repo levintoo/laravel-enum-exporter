@@ -1,10 +1,9 @@
 
 # Laravel Enum Exporter
 
-[//]: # (github ci tests)
-[//]: # (version)
-[//]: # (license)
-
+[![Tests](https://github.com/levintoo/laravel-enum-exporter/actions/workflows/tests.yml/badge.svg)](https://github.com/levintoo/laravel-enum-exporter/actions/workflows/tests.yml)
+[![Latest Unstable Version](http://poser.pugx.org/levintoo/laravel-enum-exporter/v/unstable)](https://packagist.org/packages/levintoo/laravel-enum-exporter) 
+[![License](http://poser.pugx.org/levintoo/laravel-enum-exporter/license)](https://packagist.org/packages/levintoo/laravel-enum-exporter) 
 
 Effortlessly sync PHP enums to TypeScript for type-safe frontend integration.
 This dev-only Laravel package exports your PHP enums into TypeScript files under `resources/js/enums`, letting you use the same enum definitions on the frontend as your server.
