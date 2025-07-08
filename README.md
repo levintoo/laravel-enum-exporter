@@ -16,24 +16,35 @@ composer require levintoo/laravel-enum-exporter --dev
 
 ### 🚀 Usage
 
-Export a single enum:
+**Export a single enum (TypeScript):**
 
 ```bash
-php artisan export:enum Role # or app/Enums/Role.php
+php artisan export:enum Role
+# or
+php artisan export:enum app/Enums/Role.php
 ```
 
-Export all enums in `app/Enums`:
+**Export all enums in `app/Enums` (TypeScript):**
 
 ```bash
 php artisan export:enum --all
 ```
 
+**Export enums as JavaScript workarounds (instead of TypeScript):**
+
+```bash
+php artisan export:enum Role --js
+# or
+php artisan export:enum --all --js
+```
+
 🗂 **Output Path**
 TypeScript files are generated in:
 
-```
-resources/js/enums/{kebab-case-enum}.ts
-```
+* **TypeScript:**
+  `resources/js/enums/{kebab-case-enum}.ts`
+* **JavaScript:**
+  `resources/js/enums/{kebab-case-enum}.js`
 
 ### 📝 Example
 
@@ -58,6 +69,34 @@ export enum UserStatus {
     Inactive = 'inactive',
     Pending = 'pending',
 }
+```
+or The following Javascript file will be generated:
+
+```js
+/* resources/js/enums/user-status.js */
+const UserStatus = {
+    Active: { name: 'Active', value: 'active' },
+    Inactive: { name: 'Inactive', value: 'inactive' },
+    Pending: { name: 'Pending', value: 'pending' },
+
+    cases() {
+        return Object.values(this).filter(e => e?.value !== undefined);
+    },
+
+    from(slug) {
+        return this.cases().find(
+            e => e.name.toLowerCase() === slug
+        ) ?? null;
+    },
+
+    get(value) {
+        return this.cases().find(
+            e => e.value === value
+        ) ?? null;
+    }
+};
+
+export default UserStatus;
 ```
 
 ### ⚠️ Current Status
