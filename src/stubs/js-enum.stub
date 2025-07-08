@@ -1,0 +1,21 @@
+const {{ enumName }} = {
+{{ enumCases }}
+
+    cases() {
+        return Object.values(this).filter(e => e?.value !== undefined);
+    },
+
+    from(slug) {
+        return this.cases().find(
+            e => e.name.toLowerCase() === slug
+        ) ?? null;
+    },
+
+    get(value) {
+        return this.cases().find(
+            e => e.value === value
+        ) ?? null;
+    }
+};
+
+export default {{ enumName }};

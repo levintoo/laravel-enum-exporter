@@ -8,7 +8,7 @@ use ReflectionEnum;
 
 class ExportEnumsCommand extends Command
 {
-    protected $signature = 'export:enum {class? : Fully qualified enum class name} {--all : Export all enums in app/Enums}';
+    protected $signature = 'export:enum {class? : Fully qualified enum class name} {--all : Export all enums in app/Enums} {--js : Export enums as JavaScript workaround instead of TypeScript}';
 
     protected $description = 'Export PHP enums to TypeScript for frontend use';
 
@@ -16,21 +16,22 @@ class ExportEnumsCommand extends Command
     {
         $enumClass = $this->argument('class');
         $exportAll = $this->option('all');
+        $asJs = $this->option('js');
 
         if ($exportAll) {
-            $this->exportAllEnums();
+            $this->exportAllEnums($asJs);
 
             return;
         }
 
         if ($enumClass) {
-            $this->exportSingleEnum($enumClass);
+            $this->exportSingleEnum($enumClass, $asJs);
 
             return;
         }
 
         if ($this->confirm('No enum class provided. Do you want to export all enums instead?')) {
-            $this->exportAllEnums();
+            $this->exportAllEnums($asJs);
         } else {
             $this->warn('❌ No action taken. Provide a class or use --all.');
         }
@@ -39,7 +40,7 @@ class ExportEnumsCommand extends Command
     /**
      * Export a single enum by class name.
      */
-    protected function exportSingleEnum(string $input): void
+    protected function exportSingleEnum(string $input, bool $asJs = false): void
     {
         $input = str_replace(['\\', '//'], '/', $input);
 
@@ -50,7 +51,11 @@ class ExportEnumsCommand extends Command
                 throw new \RuntimeException;
             }
 
-            $this->exportEnumToTypeScript($enumClass);
+            if ($asJs) {
+                $this->exportEnumToJs($enumClass);
+            } else {
+                $this->exportEnumToTypeScript($enumClass);
+            }
             $this->info("✅ Exported enum: {$enumClass}");
         } catch (\Throwable) {
             $this->error("❌ Unable to process '{$input}'.");
@@ -91,7 +96,7 @@ class ExportEnumsCommand extends Command
     /**
      * Export all enums in app/Enums directory.
      */
-    protected function exportAllEnums(): void
+    protected function exportAllEnums(bool $asJs = false): void
     {
         $enumPath = app_path('Enums');
 
@@ -107,7 +112,11 @@ class ExportEnumsCommand extends Command
             $className = $this->getClassFromFile($file);
 
             if ($className && enum_exists($className)) {
-                $this->exportEnumToTypeScript($className);
+                if ($asJs) {
+                    $this->exportEnumToJs($className);
+                } else {
+                    $this->exportEnumToTypeScript($className);
+                }
                 $this->info("✅ Exported enum: {$className}");
             }
         }
@@ -152,6 +161,52 @@ class ExportEnumsCommand extends Command
         }
 
         file_put_contents($outputPath, $tsContent);
+    }
+
+    /**
+     * Export a PHP enum class to a JavaScript workaround file.
+     */
+    protected function exportEnumToJs(string $enumClass): void
+    {
+        $reflection = new ReflectionEnum($enumClass);
+
+        $enumCases = collect($reflection->getCases())
+            ->map(function ($case) use ($reflection) {
+                $value = $reflection->isBacked()
+                    ? (is_string($case->getBackingValue())
+                        ? "'{$case->getBackingValue()}'"
+                        : $case->getBackingValue())
+                    : "'{$case->name}'";
+
+                return "    {$case->name}: { name: '{$case->name}', value: {$value} },";
+            })
+            ->implode("\n");
+
+        $enumName = class_basename($enumClass);
+        $stub = file_get_contents(__DIR__.'/../stubs/js-enum.stub');
+
+        $jsContent = str_replace(
+            ['{{ enumName }}', '{{ enumCases }}'],
+            [$enumName, $enumCases],
+            $stub
+        );
+
+        $fileName = Str::kebab($enumName).'.js';
+        $outputPath = base_path("resources/js/enums/{$fileName}");
+
+        if (file_exists($outputPath)) {
+            $this->warn("⚠️ Skipped {$fileName}, file already exists.");
+
+            return;
+        }
+
+        if (! is_dir(dirname($outputPath))) {
+            mkdir(dirname($outputPath), recursive: true);
+        }
+
+        file_put_contents($outputPath, $jsContent);
+
+        $this->info("✅ Exported JS enum: {$enumClass}");
     }
 
     /**
