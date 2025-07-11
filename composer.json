@@ -1,5 +1,5 @@
 {
-    "version": "0.0.1",
+    "version": "0.1.0",
     "name": "levintoo/laravel-enum-exporter",
     "description": "Laravel dev-only package to export PHP enums to TypeScript",
     "type": "library",
@@ -56,6 +56,6 @@
             "pestphp/pest-plugin": true
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }
